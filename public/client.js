@@ -1,14 +1,13 @@
-const RETRY_TIMEOUT = 5000;
 const AUTOGRADER_API =
   "https://courses.cs.vt.edu/cs3214/autograder_api/spring2024";
 const DISDOC_API = "https://courses.cs.vt.edu/cs3214/test";
+const LOGIN_URL = "http://localhost:3000/cs3214/spring2024/login";
 
 const params = new URLSearchParams(window.location.search);
 let to = params.get("to");
 let postId = params.get("postid");
 
 function log_click(data) {
-  console.log("Logging click");
   return fetch(`${DISDOC_API}/click`, {
     method: "POST",
     headers: {
@@ -32,15 +31,11 @@ async function check_login() {
     window.location.replace(to);
   } catch (e) {
     if (e.status !== 403) {
-      // Not logged in
-
-      // Make sure we're showing login button
-      document.getElementById("login-div").style.display = "inherit";
-
-      // Check again in later
-      setTimeout(check_login, RETRY_TIMEOUT);
+      // Not logged in - send them to login page (and then back)
+      let url = new URL(LOGIN_URL);
+      url.searchParams.append("next", encodeURIComponent(window.location.href));
+      window.location.replace(url);
     }
-    return false;
   }
 }
 
@@ -48,7 +43,7 @@ if (to === null || postId === null) {
   // Something about the link isn't right
   document.getElementById("invalid-link").style.display = "inherit";
 } else {
-  // Link was good, check if logged in every 5 seconds until successful
+  // Link was good, attempt redirect
   check_login();
 }
 

@@ -5,16 +5,3 @@ body {
 #invalid-link {
   display: none;
 }
-
-#login-div {
-  display: none;
-}
-
-#login-button {
-  background-color: rgb(85, 108, 214);
-  color: white;
-  border-radius: 4px;
-  padding: 6px 8px;
-  text-decoration-line: none;
-  font-size: 14px;
-}
