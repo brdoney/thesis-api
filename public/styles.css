@@ -5,3 +5,11 @@ body {
 #invalid-link {
   display: none;
 }
+
+#no-consent {
+  display: none;
+}
+
+#consent-form {
+  display: none;
+}
