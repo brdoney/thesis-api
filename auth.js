@@ -51,9 +51,9 @@ export function checkAuth(req) {
 
     try {
       // Return the token's payload
-      const payload = serializer.parse(payload, "token", maxAge);
-      return { username: payload[0], displayName: payload[1] };
-    } catch {
+      const data = serializer.parse(payload, "token", maxAge);
+      return { username: data[0], displayName: data[1] };
+    } catch (e) {
       // Invalid or expired token
       return null;
     }
