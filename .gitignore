@@ -131,4 +131,4 @@ dist
 
 # Production files
 user-map.json
-linkdata.*
+linkdata.db*

@@ -4,7 +4,13 @@ module.exports = {
         "es2021": true,
         "node": true
     },
-    "extends": "eslint:recommended",
+    "plugins": [
+      "jsdoc",
+    ],
+    "extends": [
+        "eslint:recommended",
+        "plugin:jsdoc/recommended",
+    ],
     "overrides": [
         {
             "env": {
