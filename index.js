@@ -24,38 +24,60 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(express.static("public"));
 
+// __dirname for es modules -- from
+// https://stackoverflow.com/questions/46745014/alternative-for-dirname-in-node-js-when-using-es6-modules
+const __dirname = import.meta.dirname;
+
 app.get("/", (_req, res) => {
-  res.sendFile(path.join(__dirname, "public", "index.html"));
+  return res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
 function haveConsent(userId) {
   return userId in userMap;
 }
 
-app.post("/api/consent", async (req, res) => {
+app.get("/consent", async (_, res) => {
+  // TODO: Show current consent status on page
+  return res.sendFile(path.join(__dirname, "public", "consent.html"));
+});
+
+app.post("/consent", async (req, res) => {
   const auth = checkAuth(req);
   if (!auth) {
-    res.sendStatus(401);
+    return res.sendStatus(401);
   }
 
   const data = req.body;
-  if (!data.consent && haveConsent(auth.username)) {
-    // TODO: Revoking consent; delete all data
+  if (data.consent) {
+    // Commit their consent status
+    maxId++;
+    userMap.set(auth.username, maxId);
+    await writeMap(USER_MAP);
+    console.log(`${auth.username} gave consent`);
+  } else {
+    const hadConsent = haveConsent(auth.username);
+
+    // Denying consent
+    userMap.delete(auth.username);
+    await writeMap(USER_MAP);
+
+    if (hadConsent) {
+      // TODO: Revoking consent - delete all past data
+      console.log(`${auth.username} revoked consent`);
+    } else {
+      console.log(`${auth.username} denied consent`);
+    }
   }
 
-  // Commit their consent status
-  maxId++;
-  userMap.set(auth.username, maxId);
-
-  await writeMap(USER_MAP);
+  return res.redirect(303, "/confirmed.html")
 });
 
-app.post("/api/click", (req, res) => {
+app.post("/click", (req, res) => {
   const auth = checkAuth(req);
   if (!auth) {
-    res.sendStatus(401);
+    return res.sendStatus(401);
   } else if (!haveConsent(auth.username)) {
-    res.sendStatus(403);
+    return res.sendStatus(403);
   }
 
   const userId = userMap.get(auth.username);
@@ -68,7 +90,7 @@ app.post("/api/click", (req, res) => {
     console.log(`Anonymous click`);
   }
 
-  res.sendStatus(200);
+  return res.sendStatus(200);
 });
 
 app.listen(PORT, () => {
