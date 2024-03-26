@@ -21,5 +21,6 @@ export async function writeMap(path, map) {
 }
 
 export function maxMapId(userMap) {
-  return Math.max(...userMap.values());
+  // Default to 0 if no one is in user map yet
+  return Math.max(0, ...userMap.values());
 }

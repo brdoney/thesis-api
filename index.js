@@ -33,12 +33,21 @@ app.get("/", (_req, res) => {
 });
 
 function haveConsent(userId) {
-  return userId in userMap;
+  return userMap.has(userId);
 }
 
-app.get("/consent", async (_, res) => {
+app.get("/consent", async (req, res) => {
   // TODO: Show current consent status on page
-  return res.sendFile(path.join(__dirname, "public", "consent.html"));
+  const auth = checkAuth(req);
+  if (!auth) {
+    return res.sendStatus(401);
+  }
+
+  // Send consent value, or null if we don't have it yet
+  if (haveConsent(auth.username)) {
+    return res.json({ consent: userMap.get(auth.username) });
+  }
+  return res.json(null);
 });
 
 app.post("/consent", async (req, res) => {
@@ -47,19 +56,20 @@ app.post("/consent", async (req, res) => {
     return res.sendStatus(401);
   }
 
-  const data = req.body;
-  if (data.consent) {
+  const { consent } = req.body;
+
+  if (consent === "Yes") {
     // Commit their consent status
     maxId++;
     userMap.set(auth.username, maxId);
-    await writeMap(USER_MAP);
+    await writeMap(USER_MAP, userMap);
     console.log(`${auth.username} gave consent`);
-  } else {
+  } else if (consent === "No") {
     const hadConsent = haveConsent(auth.username);
 
     // Denying consent
-    userMap.delete(auth.username);
-    await writeMap(USER_MAP);
+    userMap.set(auth.username, null);
+    await writeMap(USER_MAP, userMap);
 
     if (hadConsent) {
       // TODO: Revoking consent - delete all past data
@@ -67,9 +77,11 @@ app.post("/consent", async (req, res) => {
     } else {
       console.log(`${auth.username} denied consent`);
     }
+  } else {
+    return res.sendStatus(400);
   }
 
-  return res.redirect(303, "/confirmed.html")
+  return res.redirect(303, "/cs3214/test/confirmed.html");
 });
 
 app.post("/click", (req, res) => {

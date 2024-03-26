@@ -15,12 +15,15 @@
   <body>
     <script type="module" src="/cs3214/test/consent.js"></script>
 
+    <h3>Consent Form</h3>
+
+    <p>Current consent status: <span id="consent-status">Loading...</span></p>
+
     <form id="consent-form" method="POST" action="/cs3214/test/consent">
-      <h3>Consent Status</h3>
       <p>
-        Please indicate consent status. Remember that you can still use the tool
-        even if you choose to deny consent, but we will not collect any data on
-        your usage of the tool.
+        Please indicate your consent status below if you wish to change it.
+        Remember that you can still use the tool even if you choose to deny
+        consent, but we will not collect any data on your usage of the tool.
       </p>
 
       <div class="form-group">
@@ -35,7 +38,7 @@
         </label>
       </div>
 
-      <input type="submit" value="Submit" />
+      <input type="submit" name="submit" value="Submit" />
     </form>
   </body>
 </html>

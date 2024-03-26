@@ -15,7 +15,11 @@ body {
   display: none;
 }
 
-input[type="submit"] {
+#consent-status {
+  text-decoration: underline;
+}
+
+input[type=submit] {
   padding: 6px 16px;
   background-color: rgb(85, 108, 214);
   color: white;
@@ -23,6 +27,11 @@ input[type="submit"] {
   border-style: none;
   font-weight: 500;
   font-size: 0.875rem;
+}
+
+input[type=submit]:disabled {
+  background-color: rgba(0, 0, 0, 0.12);
+  color: rgba(0, 0, 0, 0.26);
 }
 
 .form-group {
@@ -34,7 +43,7 @@ input[type="submit"] {
 
 @media only screen and (min-width: 768px) {
   /* Make consent form centred on desktop */
-  #consent-form {
+  body {
     margin: 0 25%;
     width: 50%;
   }
