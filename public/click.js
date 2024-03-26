@@ -5,7 +5,7 @@ function sendLogClick(to, postId) {
   return fetch(`${DISDOC_API}/click`, {
     method: "POST",
     headers: {
-      Accept: "application/json",
+      "Accept": "application/json",
       "Content-Type": "application/json",
     },
     body: JSON.stringify({ to, postId }),
@@ -25,10 +25,8 @@ async function logClick(to, postId) {
     // They haven't given consent yet
     document.getElementById("no-consent").style.display = "inherit";
   } else {
-    console.log("Success");
-
-    // We want to navigate and remove old link from history
-    // window.location.replace(to);
+    // Success! We want to navigate and remove old link from history
+    window.location.replace(to);
   }
 }
 
@@ -42,6 +40,6 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("invalid-link").style.display = "inherit";
   } else {
     // Link was good, attempt redirect
-    logClick();
+    logClick(to, postId);
   }
 });

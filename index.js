@@ -1,10 +1,10 @@
-import path from "node:path";
-import express from "express";
 import { maxMapId, readMap, writeMap } from "./user-map.js";
+import { checkAuth } from "./auth.js";
+
+import express from "express";
 import cookieParser from "cookie-parser";
 import Database from "better-sqlite3";
 import "dotenv/config";
-import { checkAuth } from "./auth.js";
 
 const db = new Database("linkdata.db", { fileMustExist: true });
 db.pragma("journal_mode = WAL");
@@ -23,14 +23,6 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(express.static("public"));
-
-// __dirname for es modules -- from
-// https://stackoverflow.com/questions/46745014/alternative-for-dirname-in-node-js-when-using-es6-modules
-const __dirname = import.meta.dirname;
-
-app.get("/", (_req, res) => {
-  return res.sendFile(path.join(__dirname, "public", "index.html"));
-});
 
 function haveConsent(userId) {
   return userMap.has(userId);
@@ -97,7 +89,7 @@ app.post("/click", (req, res) => {
     // They gave consent, so log their click
     const data = req.body;
     insertStmt.run({ userId, ...data });
-    console.log(`${data.userId} clicked ${data.postId}, ${data.to}`);
+    console.log(`${auth.username} clicked ${data.postId}, ${data.to}`);
   } else {
     console.log(`Anonymous click`);
   }
