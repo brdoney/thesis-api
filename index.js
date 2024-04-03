@@ -1,10 +1,11 @@
 import { checkAuth } from "./auth.js";
+import { addUser, getUser } from "./consent.js";
 
 import express from "express";
 import cookieParser from "cookie-parser";
+import cors from "cors";
 import Database from "better-sqlite3";
 import "dotenv/config";
-import { addUser, getUser } from "./consent.js";
 
 const db = new Database("linkdata.db", { fileMustExist: true });
 db.pragma("journal_mode = WAL");
@@ -15,10 +16,11 @@ const insertStmt = db.prepare(
 const app = express();
 const PORT = 9100;
 
+app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
-app.use(express.static("public"));
+app.use(express.static("frontend/build"));
 
 app.get("/consent", async (req, res) => {
   // TODO: Show current consent status on page
@@ -42,15 +44,20 @@ app.post("/consent", async (req, res) => {
     return res.sendStatus(401);
   }
 
-  const { consent } = req.body;
+  const { consent, discordId } = req.body;
+
+  console.log(consent, discordId);
+  if (!consent || !discordId) {
+    res.status(400).send("Missing one or more expected URL-encoded parameters");
+  }
 
   if (consent === "Yes") {
     // Commit their consent status
-    addUser(db, auth.username, req.discordId, true);
+    addUser(db, auth.username, discordId, true);
     console.log(`${auth.username} gave consent`);
   } else if (consent === "No") {
     // Add or update their status
-    addUser(db, auth.username, req.discordId, false);
+    addUser(db, auth.username, discordId, false);
     console.log(`${auth.username} denied consent`);
   } else {
     return res.sendStatus(400);
