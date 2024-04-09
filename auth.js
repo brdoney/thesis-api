@@ -1,7 +1,13 @@
 import { TimedSerializer } from "itsdangerous.js";
 import { createHmac, timingSafeEqual } from "node:crypto";
+import { Request } from "express";
 
-// Adapted from https://stackoverflow.com/a/22269965
+/**
+ * Decodes a cookie value set by Flask, since it uses non-standard escapes, octal values, etc.
+ * Adapted from https://stackoverflow.com/a/22269965
+ * @param {string} val the cookie value to decode
+ * @returns {string} the decoded version of the cookie
+ */
 function decodeFlaskCookie(val) {
   if (val.indexOf("\\") === -1) {
     return val; // not encoded
@@ -23,6 +29,12 @@ function decodeFlaskCookie(val) {
   return val.replace(/\\\\/g, "\\");
 }
 
+/**
+ * Check the digest portion of the Flask, where a cookie value looks like `payload|digest`.
+ * @param {any} payload the payload to check (part before the '|')
+ * @param {any} digest digest of the payload (part after the '|')
+ * @returns {boolean} `true` if the payload was not modified since digest was sent, `false` otherwise
+ */
 function checkDigest(payload, digest) {
   const hmac = createHmac("sha512", process.env.SECRET_KEY);
 
@@ -32,6 +44,11 @@ function checkDigest(payload, digest) {
   return timingSafeEqual(Buffer.from(digest), Buffer.from(hmac.digest("hex")));
 }
 
+/**
+ * Check if a given request is authenticated based on its cookie value.
+ * @param {Request} req the request we are interested in
+ * @returns {boolean} `true` if properly authenticated, `false` otherwise
+ */
 export function checkAuth(req) {
   if (process.env.COOKIE_NAME in req.cookies) {
     let authToken = decodeFlaskCookie(req.cookies[process.env.COOKIE_NAME]);
