@@ -36,6 +36,8 @@
 	/** @type {string} */
 	let consentMsg;
 	$: if (consent == null) {
+		consentMsg = 'Error';
+	} else if (consent.consent == null) {
 		consentMsg = 'Not submitted';
 	} else if (consent.consent) {
 		consentMsg = 'Given';

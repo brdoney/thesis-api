@@ -31,10 +31,8 @@ app.get("/consent", async (req, res) => {
   const user = getUser(db, { pid: auth.username });
 
   // Send consent value, or null if we don't have it yet
-  if (user) {
-    return res.json({ consent: user.consent, ...auth });
-  }
-  return res.json(null);
+  const consent = user != null ? user.consent : null;
+  return res.json({ consent, ...auth });
 });
 
 app.post("/consent", async (req, res) => {
