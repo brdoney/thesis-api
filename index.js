@@ -23,7 +23,6 @@ app.use(cookieParser());
 app.use(express.static("frontend/build"));
 
 app.get("/consent", async (req, res) => {
-  // TODO: Show current consent status on page
   const auth = checkAuth(req);
   if (!auth) {
     return res.sendStatus(401);
@@ -33,7 +32,7 @@ app.get("/consent", async (req, res) => {
 
   // Send consent value, or null if we don't have it yet
   if (user) {
-    return res.json({ consent: user.consent });
+    return res.json({ consent: user.consent, ...auth });
   }
   return res.json(null);
 });

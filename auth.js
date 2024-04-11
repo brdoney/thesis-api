@@ -1,6 +1,6 @@
 import { TimedSerializer } from "itsdangerous.js";
 import { createHmac, timingSafeEqual } from "node:crypto";
-import { Request } from "express";
+import express from "express";
 
 /**
  * Decodes a cookie value set by Flask, since it uses non-standard escapes, octal values, etc.
@@ -46,8 +46,8 @@ function checkDigest(payload, digest) {
 
 /**
  * Check if a given request is authenticated based on its cookie value.
- * @param {Request} req the request we are interested in
- * @returns {boolean} `true` if properly authenticated, `false` otherwise
+ * @param {express.Request} req the request we are interested in
+ * @returns {{username: string, displayName: string} | null} payload if authenticated, or `null` if not
  */
 export function checkAuth(req) {
   if (process.env.COOKIE_NAME in req.cookies) {

@@ -42,6 +42,10 @@ export function getUser(db, { pid, discordId }) {
   if (!res) {
     return null;
   }
+
+  // Convert sqlite bool keywords to real boolean
+  res.consent = res.consent == "TRUE";
+
   return new UserInfo(res);
 }
 
