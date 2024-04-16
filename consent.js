@@ -14,7 +14,6 @@ class UserInfo {
     this.pid = pid;
     this.discordId = discord_id;
     this.consent = consent;
-    console.log(consent);
   }
 }
 
@@ -57,7 +56,7 @@ export function getUser(db, { pid, discordId }) {
 function deleteClickData(db, userId) {
   const stmt = db.prepare("DELETE * FROM clicks WHERE user_id = ?");
   const res = stmt.run(userId);
-  console.log(res);
+  console.log(`Deleted data for user: ${res}`);
 }
 
 /**
@@ -72,7 +71,7 @@ export function addUser(db, pid, discordId, consent) {
 
   if (prev && !consent) {
     // Revoking consent, so delete old data
-    console.log(`Clearing data for ${pid} after revoking consent`);
+    console.log(`Clearing data after revoking consent`);
     deleteClickData(db, prev.userId);
   }
 
@@ -81,7 +80,7 @@ export function addUser(db, pid, discordId, consent) {
     "INSERT OR REPLACE INTO consent VALUES (@pid, @discordId, @consent)",
   );
   const res = stmt.run({ pid, discordId, consent: convertedConsent });
-  console.log(res);
+  console.log(`Added user: ${res}`);
 }
 
 /**
@@ -92,5 +91,5 @@ export function addUser(db, pid, discordId, consent) {
 export function deleteUser(db, pid) {
   const stmt = db.prepare("DELETE FROM consent WHERE pid = ?");
   const res = stmt.run(pid);
-  console.log(res);
+  console.log(`Deleted user: ${res}`);
 }

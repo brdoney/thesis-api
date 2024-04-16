@@ -43,7 +43,6 @@ app.post("/consent", async (req, res) => {
 
   const { consent, discordId } = req.body;
 
-  console.log(consent, discordId);
   if (!consent || !discordId) {
     res.status(400).send("Missing one or more expected URL-encoded parameters");
   }
@@ -51,11 +50,9 @@ app.post("/consent", async (req, res) => {
   if (consent === "Yes") {
     // Commit their consent status
     addUser(db, auth.username, discordId, true);
-    console.log(`${auth.username} gave consent`);
   } else if (consent === "No") {
     // Add or update their status
     addUser(db, auth.username, discordId, false);
-    console.log(`${auth.username} denied consent`);
   } else {
     return res.sendStatus(400);
   }
@@ -78,9 +75,9 @@ app.post("/click", (req, res) => {
     // They gave consent, so log their click
     const data = req.body;
     insertStmt.run({ userId: user.userId, ...data });
-    console.log(`${auth.username} clicked ${data.postId}, ${data.to}`);
+    console.log(`Click on ${data.postId}, ${data.to}`);
   } else {
-    console.log(`Anonymous click`);
+    console.log("Anonymous click");
   }
 
   return res.sendStatus(200);
