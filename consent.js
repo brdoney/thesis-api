@@ -4,13 +4,13 @@ class UserInfo {
   /**
    * Create a UserInfo instance.
    * @param {object} user the user's info
-   * @param {number} user.rowid the ID of the user
+   * @param {number} user.id the ID of the user
    * @param {string} user.pid the PID of the user
    * @param {string} user.discord_id the Discord ID of the user
    * @param {boolean} user.consent whether the user has given (`true`) or denied (`false`) consent
    */
-  constructor({ rowid, pid, discord_id, consent }) {
-    this.userId = rowid;
+  constructor({ id, pid, discord_id, consent }) {
+    this.userId = id;
     this.pid = pid;
     this.discordId = discord_id;
     this.consent = consent;
@@ -28,10 +28,10 @@ class UserInfo {
 export function getUser(db, { pid, discordId }) {
   let stmt, data;
   if (pid !== undefined) {
-    stmt = db.prepare("SELECT * FROM consent WHERE pid = ? LIMIT 1");
+    stmt = db.prepare("SELECT * FROM users WHERE pid = ? LIMIT 1");
     data = pid;
   } else if (discordId !== undefined) {
-    stmt = db.prepare("SELECT * FROM consent WHERE discord_id = ? LIMIT 1");
+    stmt = db.prepare("SELECT * FROM users WHERE discord_id = ? LIMIT 1");
     data = discordId;
   } else {
     throw new Error("Must supply PID or Discord ID");
@@ -53,10 +53,27 @@ export function getUser(db, { pid, discordId }) {
  * @param {Database.Database} db database to delete click data from
  * @param {number} userId the ID of the user
  */
-function deleteClickData(db, userId) {
-  const stmt = db.prepare("DELETE * FROM clicks WHERE user_id = ?");
-  const res = stmt.run(userId);
-  console.log(`Deleted data for user: ${res}`);
+function deleteAllData(db, userId) {
+  const stmts = [
+    "DELETE * FROM clicks WHERE user_id = ?",
+    "DELETE * FROM llm_reviews WHERE author = ?",
+    "DELETE * FROM retrieval_reviews WHERE author = ?",
+    "DELETE * FROM posts WHERE author = ?",
+  ];
+  const prepared = stmts.map((stmt) => db.prepare(stmt));
+
+  db.transaction(() => {
+    try {
+      const res = prepared.map((p) => p.run(userId));
+      console.log(`Deleted data for a user: ${res}`);
+    } catch (err) {
+      if (!db.inTransaction) {
+        // (transaction was forcefully rolled back)
+        console.log("Unable to delete data for a user");
+        throw err; // Finish aborting transaction
+      }
+    }
+  });
 }
 
 /**
@@ -72,12 +89,12 @@ export function addUser(db, pid, discordId, consent) {
   if (prev && !consent) {
     // Revoking consent, so delete old data
     console.log(`Clearing data after revoking consent`);
-    deleteClickData(db, prev.userId);
+    deleteAllData(db, prev.userId);
   }
 
-  const convertedConsent = consent ? "TRUE" : "FALSE"
+  const convertedConsent = consent ? "TRUE" : "FALSE";
   const stmt = db.prepare(
-    "INSERT OR REPLACE INTO consent VALUES (@pid, @discordId, @consent)",
+    "INSERT OR REPLACE INTO users (pid, discord_id, consent) VALUES (@pid, @discordId, @consent)",
   );
   const res = stmt.run({ pid, discordId, consent: convertedConsent });
   console.log(`Added user: ${res}`);
@@ -89,7 +106,7 @@ export function addUser(db, pid, discordId, consent) {
  * @param {string} pid the PID of the user
  */
 export function deleteUser(db, pid) {
-  const stmt = db.prepare("DELETE FROM consent WHERE pid = ?");
+  const stmt = db.prepare("DELETE FROM users WHERE pid = ?");
   const res = stmt.run(pid);
   console.log(`Deleted user: ${res}`);
 }
