@@ -49,37 +49,6 @@ export function getUser(db, { pid, discordId }) {
 }
 
 /**
- * Delete all click data for the given user.
- * @param {Database.Database} db database to delete click data from
- * @param {number} userId the ID of the user
- */
-function deleteAllData(db, userId) {
-  const stmts = [
-    "DELETE * FROM clicks WHERE user_id = ?",
-    "DELETE * FROM llm_reviews WHERE author = ?",
-    "DELETE * FROM retrieval_reviews WHERE author = ?",
-    "DELETE * FROM posts WHERE author = ?",
-  ];
-  const prepared = stmts.map((stmt) => db.prepare(stmt));
-
-  // Transaction so we don't have partial deletions
-  const doDelete = db.transaction((userId) => {
-    try {
-      const res = prepared.map((p) => p.run(userId));
-      console.log(`Deleted data for a user: ${res}`);
-    } catch (err) {
-      if (!db.inTransaction) {
-        // Transaction was forcefully rolled back
-        console.log("Unable to delete data for a user");
-      }
-      throw err; // Finish aborting transaction
-    }
-  });
-
-  doDelete(userId);
-}
-
-/**
  * Adds or updates user in the database. Updates occur if PID and/or discord ID are already in the database.
  * @param {Database.Database} db the database to add the user to
  * @param {string} pid the PID of the user
@@ -92,7 +61,7 @@ export function addUser(db, pid, discordId, consent) {
   if (prev && !consent) {
     // Revoking consent, so delete old data
     console.log(`Clearing data after revoking consent`);
-    deleteAllData(db, prev.userId);
+    deleteUser(db, prev);
   }
 
   const consent_stmt = db.prepare(
@@ -123,12 +92,12 @@ export function addUser(db, pid, discordId, consent) {
 }
 
 /**
- * Deletes the user from the database. Note that this does not delete their associated click data.
+ * Deletes the user from the database. Note that this *also* deletes their associated data.
  * @param {Database.Database} db the database to delete the user from
- * @param {string} pid the PID of the user
+ * @param {UserInfo} user the user to delete
  */
-export function deleteUser(db, pid) {
-  const stmt = db.prepare("DELETE FROM users WHERE pid = ?");
-  const res = stmt.run(pid);
-  console.log(`Deleted user: ${res}`);
+export function deleteUser(db, user) {
+  const stmt = db.prepare("DELETE FROM users WHERE id = ?");
+  const res = stmt.run(user.userId);
+  console.log(`Deleted user ${user.userId}: ${res}`);
 }

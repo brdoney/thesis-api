@@ -4,7 +4,7 @@ CREATE TABLE clicks (
     user_id INTEGER,
 
     FOREIGN KEY (post_id) REFERENCES posts (id),
-    FOREIGN KEY (user_id) REFERENCES users (id)
+    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
 );
 
 CREATE TABLE users (
@@ -31,7 +31,7 @@ CREATE TABLE posts (
     -- Time from sending LLM API request to receiving the last token
     generation_time INTEGER DEFAULT 0,
 
-    FOREIGN KEY (author) REFERENCES users (id)
+    FOREIGN KEY (author) REFERENCES users (id) ON DELETE CASCADE
 );
 
 CREATE TABLE llm_reviews (
@@ -43,7 +43,7 @@ CREATE TABLE llm_reviews (
     correctness INTEGER,
 
     FOREIGN KEY (post_id) REFERENCES posts (id),
-    FOREIGN KEY (author) REFERENCES users (id),
+    FOREIGN KEY (author) REFERENCES users (id) ON DELETE CASCADE,
     UNIQUE (post_id, author)
 );
 
@@ -55,7 +55,7 @@ CREATE TABLE retrieval_reviews (
     helpfulness INTEGER,
 
     FOREIGN KEY (post_id) REFERENCES posts (id),
-    FOREIGN KEY (author) REFERENCES users (id),
+    FOREIGN KEY (author) REFERENCES users (id) ON DELETE CASCADE,
     UNIQUE (post_id, author)
 );
 
