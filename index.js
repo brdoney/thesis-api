@@ -8,7 +8,8 @@ import Database from "better-sqlite3";
 import "dotenv/config";
 
 const db = new Database("linkdata.db", { fileMustExist: true });
-db.pragma("journal_mode = WAL");
+// We're sharing the file over a network FS, so we can't use WAL
+// db.pragma("journal_mode = WAL");
 const insertStmt = db.prepare(
   "INSERT INTO clicks (link, post_id, user_id) VALUES (@to, @postId, @userId)",
 );
