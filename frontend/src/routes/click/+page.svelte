@@ -38,7 +38,7 @@
 	<h3>Invalid Link</h3>
 	<p>
 		Something about your link was invalid. If you were given this link by the Discord bot, please
-		notify Brendan Doney of this issue along with the link: {window.location.href}.
+		notify Brendan Doney of this issue along with the link: <samp>{window.location.href}</samp>.
 	</p>
 {:else if noConsent}
 	<h3>No Consent</h3>

@@ -70,7 +70,7 @@
 	{:else if !discordInfo}
 		<p>
 			Something about your link was invalid. If you were given this link by the Discord bot, please
-			notify Brendan Doney of this issue along with the link: {window.location.href}.
+			notify Brendan Doney of this issue along with the link: <samp>{window.location.href}</samp>.
 		</p>
 	{:else}
 		<p>Your information:</p>
