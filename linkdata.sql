@@ -1,6 +1,6 @@
 CREATE TABLE clicks (
     link TEXT NOT NULL,
-    post_id INTEGER,
+    post_id INTEGER,  -- Will be null if the post is anonymous
     user_id INTEGER,
 
     FOREIGN KEY (post_id) REFERENCES posts (id),

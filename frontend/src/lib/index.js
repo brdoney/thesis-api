@@ -7,7 +7,7 @@ const LOGIN_URL = 'http://courses.cs.vt.edu/cs3214/spring2024/login';
 /**
  * Send a click notice to server.
  * @param {string} to the link we are navigating to
- * @param {string} postId the ID of the post this link was in
+ * @param {string | null} postId the ID of the post this link was in
  */
 export function sendLogClick(to, postId) {
 	return fetch(`${DISDOC_API}/click`, {

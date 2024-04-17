@@ -6,13 +6,13 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import Database from "better-sqlite3";
 import "dotenv/config";
+import { logClick } from "./click.js";
 
 const db = new Database("linkdata.db", { fileMustExist: true });
 // We're sharing the file over a network FS, so we can't use WAL
 // db.pragma("journal_mode = WAL");
-const insertStmt = db.prepare(
-  "INSERT INTO clicks (link, post_id, user_id) VALUES (@to, @postId, @userId)",
-);
+// Enable foreign keys so deletes can cascade
+db.pragma("foreign_keys = ON");
 
 const app = express();
 const PORT = 9100;
@@ -75,8 +75,17 @@ app.post("/click", (req, res) => {
   if (user.consent) {
     // They gave consent, so log their click
     const data = req.body;
-    insertStmt.run({ userId: user.userId, ...data });
-    console.log(`Click on ${data.postId}, ${data.to}`);
+
+    // postId will be `null` if link comes from a post generated
+    // by a user who denied consent
+    const { postId, to } = data;
+    logClick(db, user, to, postId);
+
+    if (postId !== null) {
+      console.log(`Click on ${postId}, ${to}`);
+    } else {
+      console.log(`Click on anonymous post, ${to}`);
+    }
   } else {
     console.log("Anonymous click");
   }

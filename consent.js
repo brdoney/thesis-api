@@ -1,6 +1,6 @@
 import Database from "better-sqlite3";
 
-class UserInfo {
+export class UserInfo {
   /**
    * Create a UserInfo instance.
    * @param {object} user the user's info
