@@ -22,6 +22,12 @@ CREATE TABLE posts (
     post_id TEXT NOT NULL UNIQUE,
     author INTEGER,
     use_llm BOOLEAN,
+    llm_type TEXT NOT NULL,
+
+    -- Time to query vector database
+    retrieval_time INTEGER DEFAULT 0,
+    -- Time from sending LLM API request to receiving the last token
+    generation_time INTEGER DEFAULT 0,
 
     FOREIGN KEY (author) REFERENCES users (id)
 );
