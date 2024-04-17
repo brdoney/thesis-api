@@ -62,18 +62,21 @@ function deleteAllData(db, userId) {
   ];
   const prepared = stmts.map((stmt) => db.prepare(stmt));
 
-  db.transaction(() => {
+  // Transaction so we don't have partial deletions
+  const doDelete = db.transaction((userId) => {
     try {
       const res = prepared.map((p) => p.run(userId));
       console.log(`Deleted data for a user: ${res}`);
     } catch (err) {
       if (!db.inTransaction) {
-        // (transaction was forcefully rolled back)
+        // Transaction was forcefully rolled back
         console.log("Unable to delete data for a user");
-        throw err; // Finish aborting transaction
       }
+      throw err; // Finish aborting transaction
     }
   });
+
+  doDelete(userId);
 }
 
 /**
@@ -92,12 +95,31 @@ export function addUser(db, pid, discordId, consent) {
     deleteAllData(db, prev.userId);
   }
 
-  const convertedConsent = consent ? "TRUE" : "FALSE";
-  const stmt = db.prepare(
+  const consent_stmt = db.prepare(
     "INSERT OR REPLACE INTO users (pid, discord_id, consent) VALUES (@pid, @discordId, @consent)",
   );
-  const res = stmt.run({ pid, discordId, consent: convertedConsent });
-  console.log(`Added user: ${res}`);
+  const grading_stmt = db.prepare(
+    "INSERT OR IGNORE INTO grading (pid) VALUES (@pid)",
+  );
+
+  // Transaction so we don't have partial users
+  const doAdd = db.transaction((user) => {
+    try {
+      const consent_res = consent_stmt.run(user);
+      const grading_res = grading_stmt.run(user);
+      console.log(`Added user: ${consent_res} ${grading_res}`);
+    } catch (err) {
+      console.log("error", err);
+      if (!db.inTransaction) {
+        // Transaction was forcefully rolled back
+        console.log("Unable to register or update user");
+      }
+      throw err; // Finish aborting transaction
+    }
+  });
+
+  const convertedConsent = consent ? "TRUE" : "FALSE";
+  doAdd({ pid, discordId, consent: convertedConsent });
 }
 
 /**

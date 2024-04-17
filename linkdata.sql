@@ -10,9 +10,11 @@ CREATE TABLE clicks (
 CREATE TABLE users (
     id INTEGER PRIMARY KEY, -- Explicit alias for rowid
 
+    -- Don't access the following together with ID b/c of IRB
     pid TEXT NOT NULL UNIQUE,
     discord_id TEXT NOT NULL UNIQUE,
 
+    -- Don't access together with pid or discord_id b/c of IRB
     consent BOOLEAN
 );
 
@@ -56,3 +58,11 @@ CREATE TABLE retrieval_reviews (
     FOREIGN KEY (author) REFERENCES users (id),
     UNIQUE (post_id, author)
 );
+
+-- Only exists b/c we don't want to store any data for users who haven't stored
+-- consent b/c of IRB
+CREATE TABLE grading (
+    pid TEXT NOT NULL UNIQUE,
+    llm_reviews INTEGER DEFAULT 0,
+    retrieval_reviews INTEGER DEFAULT 0
+)
