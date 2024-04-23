@@ -46,8 +46,8 @@
 	<h3>No Consent</h3>
 	<!-- TODO: Redirect to the consent page -->
 	<p>
-		You have not indicated your consent status yet. Please do so using the Discord bot and then try
-		again. Remember that you can still use the tool, including clicking on links, if you choose to
-		deny consent.
+		You have not indicated your consent status yet. Please do so using the <samp>/consent</samp> command
+		of the Discord bot and then try again. Remember that you can still use the tool, including clicking
+		on links, if you choose to deny consent.
 	</p>
 {/if}

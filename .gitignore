@@ -132,3 +132,6 @@ dist
 # Production files
 user-map.json
 linkdata.db*
+
+# PDF files
+manpdfs

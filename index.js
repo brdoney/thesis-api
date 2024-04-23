@@ -22,6 +22,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(express.static("frontend/build"));
+app.use("/manpdfs", express.static("manpdfs"));
+app.use("/irb", express.static("irb"));
 
 app.get("/consent", async (req, res) => {
   const auth = checkAuth(req);
