@@ -26,7 +26,7 @@ app.use("/manpdfs", express.static("manpdfs"));
 app.use("/irb", express.static("irb"));
 
 app.get("/consent", async (req, res) => {
-  const auth = checkAuth(req);
+  const auth = await checkAuth(req);
   if (!auth) {
     return res.sendStatus(401);
   }
@@ -39,7 +39,7 @@ app.get("/consent", async (req, res) => {
 });
 
 app.post("/consent", async (req, res) => {
-  const auth = checkAuth(req);
+  const auth = await checkAuth(req);
   if (!auth) {
     return res.sendStatus(401);
   }
@@ -63,8 +63,8 @@ app.post("/consent", async (req, res) => {
   return res.redirect(303, "/cs3214/test/confirmed.html");
 });
 
-app.post("/click", (req, res) => {
-  const auth = checkAuth(req);
+app.post("/click", async (req, res) => {
+  const auth = await checkAuth(req);
   if (!auth) {
     return res.sendStatus(401);
   }

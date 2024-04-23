@@ -47,9 +47,9 @@ function checkDigest(payload, digest) {
 /**
  * Check if a given request is authenticated based on its cookie value.
  * @param {express.Request} req the request we are interested in
- * @returns {{username: string, displayName: string} | null} payload if authenticated, or `null` if not
+ * @returns {Promise<{username: string, displayName: string} | null>} payload if authenticated, or `null` if not
  */
-export function checkAuth(req) {
+export async function checkAuth(req) {
   if (process.env.COOKIE_NAME in req.cookies) {
     let authToken = decodeFlaskCookie(req.cookies[process.env.COOKIE_NAME]);
 
@@ -74,7 +74,22 @@ export function checkAuth(req) {
       // Invalid or expired token
       return null;
     }
+  } else {
+    // Fall back on Flask server for other services (i.e. CAS)
+    try {
+      const res = await fetch(
+        "https://courses.cs.vt.edu/cs3214/autograder_api/spring2024/whoami",
+        {
+          headers: {
+            cookie: req.headers.cookie,
+          },
+        },
+      );
+      const r = await res.json();
+      return { username: r.name, displayName: r["display_name"] };
+    } catch (e) {
+      // Invalid login
+      return null;
+    }
   }
-
-  return null;
 }
