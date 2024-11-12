@@ -3,7 +3,7 @@ CREATE TABLE clicks (
     post_id INTEGER,  -- Will be null if the post is anonymous
     user_id INTEGER,
 
-    FOREIGN KEY (post_id) REFERENCES posts (id),
+    FOREIGN KEY (post_id) REFERENCES posts (id) ON DELETE CASCADE,
     FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
 );
 
